@@ -1,0 +1,83 @@
+global:
+  domain: argocd.local
+
+configs:
+  params:
+    server.insecure: true
+
+  cm:
+    application.instanceLabelKey: argocd.argoproj.io/instance
+
+# ========================
+# ArgoCD Server
+# ========================
+server:
+  replicas: 1
+
+  service:
+    type: ClusterIP
+
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+
+    hosts:
+      - host: argocd.local
+        paths:
+          - path: /
+            pathType: Prefix
+
+  extraArgs:
+    - --insecure
+
+  persistence:
+    enabled: true
+    storageClass: nfs-client
+    accessModes:
+      - ReadWriteOnce
+    size: 5Gi
+
+# ========================
+# Repo Server
+# ========================
+repoServer:
+  replicas: 1
+
+  persistence:
+    enabled: true
+    storageClass: nfs-client
+    accessModes:
+      - ReadWriteMany
+    size: 5Gi
+
+# ========================
+# Controller
+# ========================
+controller:
+  replicas: 1
+
+# ========================
+# Redis
+# ========================
+redis:
+  enabled: true
+
+  persistence:
+    enabled: true
+    storageClass: nfs-client
+    accessModes:
+      - ReadWriteOnce
+    size: 2Gi
+
+# ========================
+# Optional
+# ========================
+dex:
+  enabled: false
+
+notifications:
+  enabled: false

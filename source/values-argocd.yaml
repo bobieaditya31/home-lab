@@ -1,0 +1,112 @@
+global:
+  image:
+    tag: ""
+
+configs:
+  params:
+    server.insecure: true   # biar bisa HTTP (untuk homelab)
+  cm:
+    application.instanceLabelKey: argocd.argoproj.io/instance
+
+# ========================
+# ArgoCD Server (UI/API)
+# ========================
+server:
+  replicas: 1
+
+  service:
+    type: ClusterIP
+
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - argocd.local
+    paths:
+      - /
+    pathType: Prefix
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+
+  extraArgs:
+    - --insecure
+
+  resources:
+    limits:
+      memory: 512Mi
+      cpu: 300m
+    requests:
+      memory: 256Mi
+      cpu: 100m
+
+  persistence:
+    enabled: true
+    accessModes:
+      - ReadWriteOnce
+    size: 5Gi
+
+# ========================
+# Repo Server (Git clone/cache)
+# ========================
+repoServer:
+  replicas: 1
+
+  resources:
+    limits:
+      memory: 512Mi
+      cpu: 300m
+    requests:
+      memory: 256Mi
+      cpu: 100m
+
+  persistence:
+    enabled: true
+    accessModes:
+      - ReadWriteOnce
+    size: 5Gi
+
+# ========================
+# Application Controller
+# ========================
+controller:
+  replicas: 1
+
+  resources:
+    limits:
+      memory: 1Gi
+      cpu: 500m
+    requests:
+      memory: 512Mi
+      cpu: 200m
+
+# ========================
+# Redis (internal cache)
+# ========================
+redis:
+  enabled: true
+
+  resources:
+    limits:
+      memory: 256Mi
+      cpu: 200m
+    requests:
+      memory: 128Mi
+      cpu: 50m
+
+  persistence:
+    enabled: true
+    size: 2Gi
+
+# ========================
+# Dex (optional auth)
+# ========================
+dex:
+  enabled: false
+
+# ========================
+# Notifications (optional)
+# ========================
+notifications:
+  enabled: false

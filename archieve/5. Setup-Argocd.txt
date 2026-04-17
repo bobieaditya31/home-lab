@@ -1,0 +1,41 @@
+# Install via Helm (Setup ArgoCD (Helm + Ingress))
+helm repo add argo https://argoproj.github.io/argo-helm
+helm repo update
+
+helm install argocd argo/argo-cd \
+  -n argocd \
+  --create-namespace \
+  -f values-argocd.yaml
+
+# Redeploy argocd
+helm upgrade --install argocd argo/argo-cd  \
+  -n argocd \
+  -f overrides-values.yaml
+
+# INSTALL HELM VIA LOCALREPO
+# Download values yang sudah di-fix dari GitHub
+curl -o overrides-values.yaml https://raw.githubusercontent.com/bobieaditya31/k8s-lab-infra/main/charts/argo-cd/overrides-values.yaml
+
+# Install dari repo Argo (tanpa dependencies local)
+helm install argocd argo/argo-cd \
+  -n argocd \
+  --create-namespace \
+  -f overrides-values.yaml
+
+# Tambahkan IP ke /etc/hosts
+127.0.0.1 argocd.local
+
+# Ambil password default
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+
+# Delete argocd yang sudah di install
+helm uninstall argocd -n argocd
+kubectl delete namespace argocd
+
+# Cek ingress argocd
+kubectl get ingress -n argocd
+kubectl get endpoints -n argocd
+
+# Test koneksi
+curl -I http://argocd.local
+curl -H "Host: argocd.local" http://127.0.0.1

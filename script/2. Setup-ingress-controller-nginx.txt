@@ -1,0 +1,6 @@
+# Setup Ingress Controller
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+
+# Running Patch
+cd /home/bobski/Documents/home-lab/cluster/
+./ingress-nginx-patch.sh 

@@ -1,0 +1,77 @@
+# Setup Ingress Controller
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+
+# Running Patch
+cd /home/bobski/Documents/home-lab/cluster/
+./ingress-nginx-patch.sh 
+
+kubectl wait --namespace ingress-nginx \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=120s
+  
+# Verifikasi
+kubectl get pods -n ingress-nginx
+
+# Install menggunakan helm
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+
+helm install ingress-nginx ingress-nginx/ingress-nginx \
+  -n ingress-nginx \
+  --create-namespace \
+  -f ingress-nginx-values.yaml
+
+# Cek Port NodePort yang Ter-assign
+kubectl get svc -n ingress-nginx
+kubectl get pods,svc,ingress -n argocd
+kubectl get pod -n ingress-nginx -o wide
+
+# Delete namespace
+kubectl delete namespace ingress-nginx
+
+
+# Retart pod
+kubectl rollout restart deploy ingress-nginx-controller -n ingress-nginx
+
+# Install menggunakan file yaml lokal
+kubectl apply -f ingress-nginx.yaml
+
+=========================================================================
+
+### INSTALL INGRESS-NGINX USING CUSTOM VALUES ###
+
+# Clone Repo ingress-nginx
+git clone https://github.com/bobieaditya31/k8s-lab-infra.git
+cd k8s-lab-infra/charts/ingress-nginx
+
+# Install Helm Chart
+helm install ingress-nginx . \
+  -n ingress-nginx \
+  --create-namespace \
+  -f overrides-values.yaml
+
+ # Verifikasi
+ kubectl get pods -n ingress-nginx -o wide
+
+ ### CLEAN TOTAL Ingress Lama ###
+
+# Delete semua ingress lama
+helm uninstall ingress-nginx -n ingress-nginx
+
+kubectl delete namespace ingress-nginx
+
+kubectl delete clusterrole ingress-nginx
+kubectl delete clusterrolebinding ingress-nginx
+kubectl delete validatingwebhookconfiguration ingress-nginx-admission
+kubectl delete mutatingwebhookconfiguration ingress-nginx-admission
+kubectl delete clusterrole ingress-nginx-admission
+kubectl delete clusterrolebinding ingress-nginx-admission
+kubectl delete ingressclass nginx
+
+# Verifikasi
+kubectl get clusterrole | grep ingress
+kubectl get clusterrolebinding | grep ingress
+kubectl get ingressclass
+
+

@@ -1,0 +1,30 @@
+# Buat struktur direktori
+mkdir -p ~/jenkins-docker
+cd ~/jenkins-docker
+
+# buat file docker-compose.yaml (file sudah ada di direktori cluster/jenkins-docker)
+
+# JALANKAN JENKINS
+docker compose up -d
+
+# AKSES JENKINS
+http://localhost:8080
+
+# AMBIL PASSWORD AWAL JENKINS
+docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+
+# Install suggested plugins
+Docker Pipeline
+Git
+Pipeline
+
+# VALIDASI DOCKER DI JENKINS
+docker exec -it jenkins bash
+docker ps
+
+# FIX PERMISSION (kalau perlu)
+usermod -aG docker jenkins
+docker restart jenkins
+
+# CLEAN OLD JENKINS
+docker rm -f jenkins

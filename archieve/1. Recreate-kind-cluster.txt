@@ -1,0 +1,25 @@
+# Lihat Cluster yang Ada
+kind get clusters
+
+# Delete cluster
+kind delete cluster --name <nama-cluster>
+
+# Hapus semua cluster sekaligus
+kind delete clusters --all
+
+# Atau hapus multiple cluster by name
+kind delete clusters kind my-cluster production-cluster
+
+# Cek tidak ada container KIND yang berjalan
+docker ps -a | grep kind
+
+# create kind cluster 
+kind create cluster --name homelab --config kind-config.yaml
+
+# Tambahkan role "worker" ke node worker
+kubectl label node homelab-worker node-role.kubernetes.io/worker=
+kubectl label node homelab-worker2 node-role.kubernetes.io/worker=
+
+# Optimasi ringan (WAJIB untuk RAM 16GB)
+kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+

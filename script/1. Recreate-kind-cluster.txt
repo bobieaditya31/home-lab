@@ -1,0 +1,10 @@
+# create kind cluster 
+kind create cluster --name homelab --config kind-config.yaml
+
+# Tambahkan role "worker" ke node worker
+kubectl label node homelab-worker node-role.kubernetes.io/worker=
+kubectl label node homelab-worker2 node-role.kubernetes.io/worker=
+
+# Optimasi ringan (WAJIB untuk RAM 16GB)
+kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+

@@ -1,0 +1,43 @@
+# PREREQUISITE
+sudo apt update && sudo apt install -y \
+  docker.io docker-compose \
+  curl wget git vim \
+  nfs-kernel-server
+
+# Enable docker:
+sudo usermod -aG docker $USER
+newgrp docker
+
+# SETUP KIND CLUSTER
+kind create cluster --name homelab --config kind-config.yaml
+
+# Maintenance Script
+#!/bin/bash
+# ~/homelab/maintenance.sh
+
+echo "=== Homelab Maintenance ==="
+
+# Cleanup Docker
+echo "Cleaning Docker..."
+docker system prune -af --volumes
+
+# Cleanup KIND logs
+echo "Cleaning logs..."
+sudo find /var/log -type f -name "*.log" -mtime +7 -delete 2>/dev/null
+
+# Check disk usage
+echo "Disk usage:"
+df -h
+
+# Check memory
+echo "Memory usage:"
+free -h
+
+# Restart jika memory penuh
+MEM_USAGE=$(free | grep Mem | awk '{printf("%.0f", $3/$2 * 100.0)}')
+if [ "$MEM_USAGE" -gt 90 ]; then
+    echo "Memory critical! Restarting Jenkins..."
+    docker restart jenkins
+fi
+
+echo "Maintenance complete!"

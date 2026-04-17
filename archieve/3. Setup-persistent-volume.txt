@@ -1,0 +1,47 @@
+# Setup NFS
+sudo mkdir -p /data/nfs
+sudo chown -R nobody:nogroup /data/nfs
+sudo chmod 777 /data/nfs
+
+# Edit file exports
+sudo vim /etc/exports
+
+# Isi file exports
+/data/nfs *(rw,sync,no_subtree_check,no_root_squash)
+
+# Apply
+sudo exportfs -rav
+sudo systemctl restart nfs-kernel-server
+
+# Install NFS Client di KIND nodes (ulang untuk semua worker)
+docker exec -it homelab-control-plane apt update
+docker exec -it homelab-control-plane apt install -y nfs-common
+
+docker exec -it homelab-worker apt update
+docker exec -it homelab-worker apt install -y nfs-common
+
+docker exec -it homelab-worker2 apt update
+docker exec -it homelab-worker2 apt install -y nfs-common
+
+# Install Helm
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+# Deploy NFS StorageClass (Gunakan nfs-subdir-external-provisioner)
+helm repo add nfs-subdir https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+helm repo update
+
+helm install nfs-provisioner nfs-subdir/nfs-subdir-external-provisioner \
+  --set nfs.server=192.168.1.19 \
+  --set nfs.path=/data/nfs \
+  --set storageClass.name=nfs-client \
+  --set storageClass.create=true
+
+# Cek StorageClass
+kubectl get storageclass
+
+# To make nfs-client the default StorageClass instead:
+# Remove default from standard
+kubectl patch storageclass standard -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
+
+# Set nfs-client as default
+kubectl patch storageclass nfs-client -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'

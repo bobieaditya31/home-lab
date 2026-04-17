@@ -1,0 +1,14 @@
+helm repo add nfs-subdir https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+helm repo update
+
+helm install nfs-provisioner nfs-subdir/nfs-subdir-external-provisioner \
+  --set nfs.server=192.168.1.19 \
+  --set nfs.path=/data/nfs
+
+bobski@my-homelab:~$ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+T8mBUQ46eacbZnx7bobski@my-homelab:~$ 
+
+kind delete cluster --name homelab
+
+kubectl delete pod -n portainer -l app.kubernetes.io/name=myapp
+
