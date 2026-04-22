@@ -39,3 +39,6 @@ kubectl get endpoints -n argocd
 # Test koneksi
 curl -I http://argocd.local
 curl -H "Host: argocd.local" http://127.0.0.1
+
+# Cek images yang sudah berhasil ke deploy
+kubectl get deploy -A -o yaml | grep image:
