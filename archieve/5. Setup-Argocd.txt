@@ -42,3 +42,6 @@ curl -H "Host: argocd.local" http://127.0.0.1
 
 # Cek images yang sudah berhasil ke deploy
 kubectl get deploy -A -o yaml | grep image:
+
+# Command hapus image cache yang tidak terpakai
+docker image prune -a
