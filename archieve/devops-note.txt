@@ -12,3 +12,6 @@ kind delete cluster --name homelab
 
 kubectl delete pod -n portainer -l app.kubernetes.io/name=myapp
 
+# Login ke postgres
+psql -h 172.18.0.3 -p 30432 -U myuser -d homelab_db
+
